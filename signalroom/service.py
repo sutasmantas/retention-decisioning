@@ -8,7 +8,7 @@ import pandas as pd
 from signalroom.config import Settings
 from signalroom.data import FEATURES
 from signalroom.modeling import reason_codes, score_frame
-from signalroom.policy import apply_policy, policy_curve
+from signalroom.policy import apply_policy, apply_risk_only_policy, policy_curve
 from signalroom.schemas import PolicyRequest, ScoreRequest
 from signalroom.training import train_and_persist
 
@@ -93,9 +93,21 @@ class RetentionService:
     def summary(self) -> dict[str, Any]:
         policy = self._policy()
         selected, outcome = apply_policy(self.accounts, policy["threshold"], policy["capacity"])
+        _, risk_only = apply_risk_only_policy(
+            self.accounts,
+            policy["threshold"],
+            policy["capacity"],
+        )
         return {
             "policy": policy,
             "outcome": outcome,
+            "risk_only_baseline": {
+                **risk_only,
+                "net_value_gap": round(
+                    outcome["expected_net_value"] - risk_only["expected_net_value"],
+                    0,
+                ),
+            },
             "model": {
                 "status": self.health_status(),
                 "version": "churn-logit-1.0",

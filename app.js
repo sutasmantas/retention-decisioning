@@ -22,6 +22,7 @@ const modal = byId("score-modal");
 const modalBackdrop = byId("modal-backdrop");
 const toast = byId("toast");
 const slider = byId("threshold-slider");
+const capacitySlider = byId("capacity-slider");
 
 const escapeHtml = value => String(value)
   .replaceAll("&", "&amp;")
@@ -30,6 +31,10 @@ const escapeHtml = value => String(value)
   .replaceAll('"', "&quot;");
 
 const percentage = value => `${Math.round(Number(value) * 100)}%`;
+const signedPercentage = value => {
+  const number = Math.round(Number(value) * 100);
+  return `${number > 0 ? "+" : ""}${number}%`;
+};
 const decimal = value => Number(value).toFixed(2);
 const money = value => {
   const number = Number(value);
@@ -58,6 +63,9 @@ function showView(name) {
   pages.forEach(page => page.classList.toggle("active", page.id === `view-${name}`));
   navItems.forEach(item => item.classList.toggle("active", item.dataset.view === name));
   byId("page-title").textContent = viewNames[name];
+  if (window.location.hash !== `#${name}`) {
+    window.history.replaceState(null, "", `#${name}`);
+  }
   window.scrollTo(0, 0);
 }
 
@@ -99,26 +107,28 @@ function riskClass(risk) {
 function overviewRow(account) {
   return `<button class="account-row" data-account-id="${escapeHtml(account.account_id)}">
     <span class="account-name"><i class="account-logo coral">${escapeHtml(account.account_name[0])}</i><span><b>${escapeHtml(account.account_name)}</b><small>${escapeHtml(account.segment)} · ${money(account.mrr)} MRR</small></span></span>
-    <span><b>${account.days_to_renewal} days</b><small>to renewal</small></span>
-    <span><b class="risk-score ${riskClass(account.risk)}">${percentage(account.risk)}</b><small>${escapeHtml(account.risk_tier)}</small></span>
+    <span><b class="uplift-value">${signedPercentage(account.uplift)}</b><small>estimated uplift</small></span>
+    <span><b>${money(account.expected_net_value)}</b><small>expected net value</small></span>
     <span><b>${escapeHtml(account.action)}</b><small>${escapeHtml(account.top_signal)}</small></span>
-    <span class="row-arrow">→</span>
+    <span><b>${account.days_to_renewal}d</b><small>to renewal</small></span>
+    <span class="row-arrow">↗</span>
   </button>`;
 }
 
 function accountRow(account) {
   return `<button class="account-row" data-account-id="${escapeHtml(account.account_id)}">
     <span class="account-name"><i class="account-logo coral">${escapeHtml(account.account_name[0])}</i><span><b>${escapeHtml(account.account_name)}</b><small>${escapeHtml(account.segment)}</small></span></span>
-    <span>${account.days_to_renewal} days</span>
-    <span>${money(account.mrr)}</span>
     <span><b class="risk-score ${riskClass(account.risk)}">${percentage(account.risk)}</b></span>
-    <span>${escapeHtml(account.top_signal)}</span>
-    <span class="action-link">Review →</span>
+    <span><b class="uplift-value">${signedPercentage(account.uplift)}</b></span>
+    <span><b>${money(account.expected_net_value)}</b></span>
+    <span>${account.days_to_renewal} days</span>
+    <span>${escapeHtml(account.action)}</span>
+    <span class="action-link">Inspect ↗</span>
   </button>`;
 }
 
 function renderAccountTables() {
-  const overviewHeader = `<div class="table-head"><span>ACCOUNT</span><span>RENEWAL</span><span>RISK</span><span>RECOMMENDED ACTION</span><span></span></div>`;
+  const overviewHeader = `<div class="table-head"><span>ACCOUNT</span><span>UPLIFT</span><span>NET VALUE</span><span>RECOMMENDED PLAY</span><span>RENEWAL</span><span></span></div>`;
   byId("overview-accounts").innerHTML = overviewHeader
     + state.summary.priority_accounts.slice(0, 5).map(overviewRow).join("");
   renderFilteredAccounts();
@@ -131,7 +141,7 @@ function renderFilteredAccounts() {
       .toLowerCase()
       .includes(query)
   ).slice(0, 40);
-  const header = `<div class="table-head"><span>ACCOUNT</span><span>RENEWAL</span><span>MRR</span><span>RISK</span><span>TOP SIGNAL</span><span>ACTION</span></div>`;
+  const header = `<div class="table-head"><span>ACCOUNT</span><span>RISK</span><span>UPLIFT</span><span>NET VALUE</span><span>RENEWAL</span><span>RECOMMENDED PLAY</span><span></span></div>`;
   byId("all-accounts").innerHTML = header + filtered.map(accountRow).join("");
 }
 
@@ -162,6 +172,9 @@ function renderSummary() {
   byId("priority-count").textContent = outcome.queued_accounts;
   byId("capacity-summary").innerHTML = `${percentage(outcome.capacity_used)} <span>of ${policy.capacity}-account capacity</span>`;
   byId("protected-mrr").textContent = money(outcome.expected_mrr_protected);
+  byId("baseline-lift").textContent = state.summary.risk_only_baseline.net_value_gap >= 0
+    ? `${money(state.summary.risk_only_baseline.net_value_gap)} more net value than risk-only ranking`
+    : `${money(Math.abs(state.summary.risk_only_baseline.net_value_gap))} below the risk-only baseline`;
   byId("model-health").textContent = model.status;
   byId("model-quality-summary").innerHTML = `ROC-AUC ${decimal(model.roc_auc)} <span>· Brier ${decimal(model.brier_score)}</span>`;
   byId("impact-protected").textContent = money(outcome.expected_mrr_protected);
@@ -173,6 +186,8 @@ function renderSummary() {
   byId("account-table-note").textContent = `${total} held-out accounts · reproducible synthetic dataset`;
   byId("matrix-risk-gate").textContent = `Score ≥ ${threshold}`;
   slider.value = Math.round(policy.threshold * 100);
+  capacitySlider.value = policy.capacity;
+  byId("capacity-number").textContent = policy.capacity;
   byId("cover-policy-label").textContent = outcome.capacity_used >= 0.95
     ? "Capacity-fit policy"
     : "Focused policy";
@@ -181,11 +196,22 @@ function renderSummary() {
 }
 
 function renderImpactCurve() {
-  const maximum = Math.max(...state.curve.map(row => row.expected_net_value), 1);
+  const maximum = Math.max(
+    ...state.curve.flatMap(row => [
+      row.expected_net_value,
+      row.risk_only_expected_net_value
+    ]),
+    1
+  );
   const points = state.curve.map((row, index) => {
     const x = 4 + index * 92 / (state.curve.length - 1);
     const y = 88 - row.expected_net_value / maximum * 68;
     return { x, y, threshold: row.threshold };
+  });
+  const baselinePoints = state.curve.map((row, index) => {
+    const x = 4 + index * 92 / (state.curve.length - 1);
+    const y = 88 - Math.max(row.risk_only_expected_net_value, 0) / maximum * 68;
+    return { x, y };
   });
   byId("impact-line").setAttribute(
     "points",
@@ -194,6 +220,10 @@ function renderImpactCurve() {
   byId("impact-area").setAttribute(
     "d",
     `M ${points[0].x},90 L ${points.map(point => `${point.x},${point.y}`).join(" L ")} L ${points.at(-1).x},90 Z`
+  );
+  byId("impact-baseline").setAttribute(
+    "points",
+    baselinePoints.map(point => `${point.x},${point.y}`).join(" ")
   );
   const activeThreshold = state.summary.policy.threshold;
   const marker = points.reduce((best, point) =>
@@ -226,6 +256,10 @@ function renderPolicy(threshold) {
   byId("recall-value").textContent = percentage(outcome.recall);
   byId("precision-value").textContent = percentage(outcome.precision);
   byId("chart-value").textContent = money(outcome.expected_net_value);
+  byId("baseline-value").textContent = outcome.net_value_gain_vs_risk_only >= 0
+    ? `${money(outcome.net_value_gain_vs_risk_only)} above risk-only queue`
+    : `${money(Math.abs(outcome.net_value_gain_vs_risk_only))} below risk-only queue`;
+  byId("capacity-number").textContent = capacitySlider.value;
   byId("policy-note-title").textContent = `At ${thresholdNumber}% risk`;
   byId("policy-note-copy").textContent = outcome.eligible_accounts > outcome.capacity
     ? `${outcome.eligible_accounts} accounts qualify; the ${outcome.capacity} highest expected-value accounts are selected.`
@@ -235,12 +269,25 @@ function renderPolicy(threshold) {
   });
   const samples = state.curve.filter((_, index) => index % 7 === 0).slice(0, 6);
   const maximum = Math.max(...samples.map(row => row.expected_net_value), 1);
+  const selectedSample = samples.reduce((best, row) =>
+    Math.abs(row.threshold - outcome.threshold) < Math.abs(best.threshold - outcome.threshold)
+      ? row
+      : best
+  );
   document.querySelectorAll(".cost-bars i").forEach((bar, index) => {
     const row = samples[index];
     if (!row) return;
     bar.style.height = `${Math.max(12, row.expected_net_value / maximum * 88)}%`;
-    bar.classList.toggle("selected", row.threshold === outcome.threshold);
+    bar.classList.toggle("selected", row.threshold === selectedSample.threshold);
   });
+}
+
+async function updateCapacity(value) {
+  byId("capacity-number").textContent = value;
+  const response = await requestJson(`/api/policy/curve?capacity=${Number(value)}`);
+  state.curve = response.curve;
+  renderPolicy(slider.value);
+  renderImpactCurve();
 }
 
 function labelForFeature(feature) {
@@ -289,6 +336,7 @@ async function showAccount(accountId) {
   byId("drawer-policy-tier").textContent = `${account.segment} · ${account.risk_tier}`;
   byId("drawer-action-uplift").textContent = percentage(account.uplift);
   byId("drawer-mrr").textContent = `${money(account.mrr)} MRR`;
+  byId("drawer-net-value").textContent = money(account.expected_net_value);
   byId("drawer-model").textContent = `Score generated by ${account.model_version}`;
   openDrawer();
 }
@@ -335,11 +383,17 @@ async function applyPolicy() {
   try {
     await requestJson("/api/policy", {
       method: "PUT",
-      body: JSON.stringify({ threshold: Number(slider.value) / 100, capacity: 50 })
+      body: JSON.stringify({
+        threshold: Number(slider.value) / 100,
+        capacity: Number(capacitySlider.value)
+      })
     });
     await loadCore();
     renderPolicy(slider.value);
-    showToast("Policy saved", `${slider.value}% is now the persistent intervention threshold.`);
+    showToast(
+      "Policy saved",
+      `${slider.value}% risk threshold · ${capacitySlider.value}-account capacity.`
+    );
   } catch (error) {
     showToast("Policy not saved", error.message, true);
   } finally {
@@ -361,12 +415,12 @@ async function copyActionPlan() {
 }
 
 async function loadCore() {
-  const [summary, accounts, monitoring, curve] = await Promise.all([
+  const [summary, accounts, monitoring] = await Promise.all([
     requestJson("/api/summary"),
     requestJson("/api/accounts?limit=100"),
-    requestJson("/api/monitoring"),
-    requestJson("/api/policy/curve?capacity=50")
+    requestJson("/api/monitoring")
   ]);
+  const curve = await requestJson(`/api/policy/curve?capacity=${summary.policy.capacity}`);
   state.summary = summary;
   state.accounts = accounts.accounts;
   state.monitoring = monitoring;
@@ -397,6 +451,16 @@ byId("run-score").addEventListener("click", runScore);
 byId("create-task").addEventListener("click", copyActionPlan);
 byId("account-search").addEventListener("input", renderFilteredAccounts);
 slider.addEventListener("input", event => renderPolicy(event.target.value));
+let capacityPreviewTimer;
+capacitySlider.addEventListener("input", event => {
+  byId("capacity-number").textContent = event.target.value;
+  window.clearTimeout(capacityPreviewTimer);
+  capacityPreviewTimer = window.setTimeout(() => {
+    updateCapacity(event.target.value).catch(error =>
+      showToast("Capacity preview unavailable", error.message, true)
+    );
+  }, 120);
+});
 document.querySelectorAll(".preset-row button").forEach(button =>
   button.addEventListener("click", () => {
     slider.value = button.dataset.threshold;
@@ -407,6 +471,12 @@ byId("apply-policy").addEventListener("click", applyPolicy);
 
 const params = new URLSearchParams(window.location.search);
 const shot = params.get("shot");
+const initialView = window.location.hash.slice(1);
+if (viewNames[initialView]) showView(initialView);
+window.addEventListener("hashchange", () => {
+  const nextView = window.location.hash.slice(1);
+  if (viewNames[nextView]) showView(nextView);
+});
 if (shot === "cover") document.body.classList.add("cover-mode");
 if (shot === "account") document.body.classList.add("image-shot", "shot-account");
 if (shot === "policy") {

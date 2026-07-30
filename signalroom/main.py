@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="SignalRoom Retention Decisioning API",
-    version="1.0.0",
+    version="2.0.0",
     description=(
         "Reproducible churn scoring, heterogeneous treatment-effect estimation and "
         "capacity-aware retention policy simulation."

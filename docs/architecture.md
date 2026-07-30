@@ -10,7 +10,9 @@ flowchart LR
     T --> A
     U --> A
     A --> P[Value and capacity policy]
+    A --> R[Risk-only comparator]
     P --> API[FastAPI service]
+    R --> API
     API --> UI[Retention decision workspace]
     API --> M[Held-out monitoring endpoint]
 ```
@@ -44,6 +46,11 @@ An account enters the queue only when it clears the active risk threshold,
 has positive uplift, and has positive expected net value. Eligible accounts
 are then ranked by expected net value and truncated at the capacity limit.
 
+For every threshold and capacity setting, SignalRoom also constructs a
+risk-only baseline that ranks accounts by churn probability without the uplift
+or value gates. The API exposes the baseline net value and the gap between the
+two policies. This is a decision comparator, not a causal estimate by itself.
+
 ## Explainability
 
 The UI labels its explanations as input-based reason codes. They are
@@ -58,4 +65,3 @@ attributions. The churn probability itself comes from the fitted model.
 - Calibrate action costs from operational data.
 - Log scores, features, policy versions and realized outcomes.
 - Add authentication, tenant isolation, audit logs and scheduled retraining.
-

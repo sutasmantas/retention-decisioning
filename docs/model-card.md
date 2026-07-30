@@ -28,6 +28,17 @@ Deterministic seed `42`, 2,400 generated accounts, stratified 75/25 split.
 The holdout is also reported by segment and five probability bands through
 `GET /api/monitoring`.
 
+## Decision-policy comparator
+
+The product reports a risk-only baseline alongside the value-aware policy. The
+baseline uses the same risk threshold and capacity, but ranks by churn
+probability and does not remove negative-uplift or negative-value accounts.
+This comparison quantifies the modeled economic difference between the two
+queue-construction rules on the same scored population.
+
+It does not prove realized business lift. That requires prospective outcome
+measurement under a randomized intervention.
+
 ## Inputs
 
 Segment, MRR, seat change, weekly active ratio, priority-ticket count, days to
@@ -51,4 +62,3 @@ renewal, feature adoption, tenure, NPS and support-resolution time.
 4. Run a randomized intervention experiment.
 5. Confirm intervention costs and capacity with operations.
 6. Add outcome logging and retraining/rollback controls.
-

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from signalroom.data import generate_accounts
-from signalroom.policy import apply_policy, policy_curve
+from signalroom.policy import apply_policy, apply_risk_only_policy, policy_curve
 
 
 def test_synthetic_generation_is_reproducible_and_treatment_is_randomized():
@@ -34,3 +34,27 @@ def test_policy_respects_capacity_and_uses_positive_net_value():
     assert outcome["capacity_used"] == 1
     assert len(policy_curve(accounts, capacity=2)) == 36
 
+
+def test_value_aware_policy_outperforms_risk_only_when_high_risk_action_has_no_value():
+    accounts = pd.DataFrame(
+        {
+            "risk": [0.95, 0.88, 0.81],
+            "uplift": [-0.02, 0.08, 0.12],
+            "expected_net_value": [-200, 500, 900],
+            "expected_mrr_protected": [0, 700, 1200],
+            "mrr": [12000, 9000, 10000],
+            "churned": [1, 1, 0],
+        }
+    )
+
+    selected, value_aware = apply_policy(accounts, threshold=0.80, capacity=2)
+    baseline_selected, risk_only = apply_risk_only_policy(
+        accounts,
+        threshold=0.80,
+        capacity=2,
+    )
+
+    assert selected["expected_net_value"].tolist() == [900, 500]
+    assert baseline_selected["expected_net_value"].tolist() == [-200, 500]
+    assert value_aware["expected_net_value"] > risk_only["expected_net_value"]
+    assert risk_only["negative_uplift_accounts"] == 1

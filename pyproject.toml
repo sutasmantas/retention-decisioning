@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "signalroom-retention"
-version = "1.0.0"
-description = "Reproducible churn scoring and capacity-aware retention decisioning"
+version = "2.0.0"
+description = "Value-aware retention decisioning with uplift modeling and capacity-constrained policy simulation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

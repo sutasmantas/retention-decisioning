@@ -23,6 +23,8 @@ def test_summary_accounts_and_account_detail(api_client):
     assert summary.status_code == 200
     assert summary.json()["total_accounts"] == 300
     assert len(summary.json()["priority_accounts"]) > 0
+    assert "risk_only_baseline" in summary.json()
+    assert "net_value_gap" in summary.json()["risk_only_baseline"]
     assert len(accounts.json()["accounts"]) == 8
 
     account_id = accounts.json()["accounts"][0]["account_id"]
@@ -77,4 +79,3 @@ def test_monitoring_and_health_are_artifact_backed(api_client):
     assert len(monitoring.json()["calibration"]) == 5
     assert len(monitoring.json()["feature_stability"]) == 4
     assert "synthetic" in monitoring.json()["data_note"].lower()
-
