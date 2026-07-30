@@ -1,8 +1,18 @@
 # SignalRoom
 
-SignalRoom is a runnable customer-retention decision system. It trains a churn
-model and a two-model treatment-effect estimator, scores a held-out account
-population, and turns the output into a capacity-constrained outreach queue.
+[![CI](https://github.com/sutasmantas/retention-decisioning/actions/workflows/ci.yml/badge.svg)](https://github.com/sutasmantas/retention-decisioning/actions/workflows/ci.yml)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Coverage 85%+](https://img.shields.io/badge/coverage-85%25%2B-15803D)](.github/workflows/ci.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-15803D)](LICENSE)
+
+**Prioritize retention work by expected incremental value, not churn risk
+alone.**
+
+SignalRoom trains a churn model and a two-model treatment-effect estimator,
+scores a held-out account population, and turns the output into a
+capacity-constrained outreach queue. It makes the business policy visible:
+intervention cost, expected protected MRR, threshold, capacity, and reason codes
+can all be inspected rather than buried in a notebook.
 
 The interface is backed by the API: changing account signals changes the model
 score, moving the risk threshold recalculates policy outcomes, and applying a
@@ -10,7 +20,27 @@ policy persists it across refreshes.
 
 ![Retention decision overview](docs/screenshots/retention-overview.png)
 
+## Try the decision policy
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sutasmantas/retention-decisioning?quickstart=1)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sutasmantas/retention-decisioning)
+
+The Codespace installs the project, retrains the default-seed artifacts, and
+starts the interface on port 8000. Change the threshold or outreach capacity,
+inspect the value/load curve, and score an account with different product and
+support signals.
+
+The Render image retrains on startup. Free Render instances sleep and generated
+policy state can reset because the local filesystem is ephemeral.
+
+<details>
+<summary>Inspect the account-level decision and model monitoring</summary>
+
 ![Account-level decision](docs/screenshots/account-decision.png)
+
+![Model monitoring](docs/screenshots/model-monitoring.png)
+
+</details>
 
 ## Why this is more than a churn dashboard
 
@@ -92,3 +122,6 @@ node --check app.js
 docker compose config -q
 ```
 
+## License
+
+MIT

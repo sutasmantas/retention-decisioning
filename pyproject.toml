@@ -6,7 +6,10 @@ build-backend = "hatchling.build"
 name = "signalroom-retention"
 version = "1.0.0"
 description = "Reproducible churn scoring and capacity-aware retention decisioning"
+readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Mantas Sutas" }]
 dependencies = [
   "fastapi>=0.116,<1",
   "joblib>=1.4,<2",
@@ -40,4 +43,3 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.coverage.run]
 source = ["signalroom"]
-
