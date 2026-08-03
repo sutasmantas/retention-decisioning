@@ -1,0 +1,12 @@
+services:
+  signalroom:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - signalroom-data:/app/data/runtime
+    restart: unless-stopped
+
+volumes:
+  signalroom-data:
+

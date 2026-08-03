@@ -1,0 +1,15 @@
+.env
+.venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+data/runtime/
+assets/
+final_upload/
+docs/upwork_media/raw_video/
+docs/archive_pre_real_benchmark_media/
+qa_*.png

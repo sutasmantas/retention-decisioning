@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignalRoom — Retention Decisioning</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section id="portfolio-cover" class="portfolio-cover" aria-label="SignalRoom portfolio cover">
+    <header class="cover-brand">
+      <span class="brand-glyph">S</span>
+      <div><b>SignalRoom</b><small>Retention decisioning</small></div>
+      <span class="model-live"><i></i> Model health stable</span>
+    </header>
+    <div class="cover-copy">
+      <p class="eyebrow">NEXT-BEST-ACTION ENGINE</p>
+      <h1>Put retention effort<br>where it changes the outcome.</h1>
+      <p>Churn risk, estimated uplift, customer value and team capacity—combined in one executable policy.</p>
+    </div>
+    <div class="cover-board">
+      <div class="cover-metrics">
+        <div><span>Expected MRR protected</span><b id="cover-protected">—</b></div>
+        <div><span>At-risk MRR</span><b id="cover-at-risk">—</b></div>
+        <div><span>Capacity used</span><b id="cover-capacity">—</b><small id="cover-queued">Loading policy</small></div>
+      </div>
+      <div class="cover-chart">
+        <header><span>Expected net value by threshold</span><b id="cover-policy-label">Active policy</b></header>
+        <div class="cover-curve">
+          <i></i><i></i><i></i><i></i>
+          <div class="retention-threshold"><b id="cover-threshold">—</b><small>ACTIVE POLICY</small></div>
+        </div>
+        <footer><span>More coverage</span><b>Best value within capacity</b><span>Higher precision</span></footer>
+      </div>
+      <aside class="cover-priority">
+        <header><span>Priority queue</span><b id="cover-priority-total">—</b></header>
+        <div id="cover-priority-list"></div>
+      </aside>
+    </div>
+  </section>
+
+  <header class="shot-banner" id="shot-banner">
+    <div class="shot-brand"><span class="brand-glyph">S</span><b>SignalRoom</b></div>
+    <div><p id="shot-kicker">ACCOUNT DECISION</p><h1 id="shot-title">See why this intervention is worth making.</h1></div>
+  </header>
+
+  <div id="app-shell" class="app-shell">
+    <header class="product-header">
+      <a class="brand" href="#overview" aria-label="SignalRoom overview">
+        <span class="brand-glyph">S</span>
+        <span><b>SignalRoom</b><small>Retention decisioning</small></span>
+      </a>
+
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <button class="nav-item active" data-view="overview">Decision room</button>
+        <button class="nav-item" data-view="accounts">Accounts <span id="account-count">—</span></button>
+        <button class="nav-item" data-view="policy">Policy simulator</button>
+        <button class="nav-item" data-view="monitoring">Model health</button>
+      </nav>
+
+      <div class="header-actions">
+        <div class="model-status">
+          <i class="health-dot"></i>
+          <span><b id="sidebar-health">—</b><small><span id="model-version">Loading</span> · AUC <span id="sidebar-auc">—</span></small></span>
+        </div>
+        <a class="api-link api-reference" href="/docs" target="_blank" rel="noreferrer">API</a>
+        <button class="primary-button" id="score-account">Score account</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <header class="context-bar">
+        <div><span>Revenue operations</span><i>/</i><b id="page-title">Retention overview</b></div>
+        <span>Current synthetic holdout</span>
+      </header>
+
+      <section class="page active" id="view-overview">
+        <header class="decision-hero">
+          <div>
+            <p class="eyebrow">ACTIVE RETENTION POLICY</p>
+            <h1>Act where the intervention<br>is expected to pay back.</h1>
+            <p>Accounts are ranked by incremental value—not churn risk alone.</p>
+          </div>
+          <div class="policy-pill" id="active-policy-pill"><span class="health-dot"></span>Loading policy</div>
+        </header>
+
+        <section class="decision-board">
+          <article class="curve-panel">
+            <header class="panel-header">
+              <div><p class="panel-kicker">DECISION CURVE</p><h2>Expected value across policy thresholds</h2></div>
+              <div class="curve-legend"><span><i class="lime"></i>Value-aware policy</span><span><i class="baseline"></i>Risk-only queue</span><span><i></i>Active point</span></div>
+            </header>
+            <div class="impact-hero">
+              <span id="impact-protected">—</span>
+              <small>expected MRR protected</small>
+            </div>
+            <div class="chart large" aria-label="Expected net value by threshold">
+              <svg id="impact-curve" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path id="impact-area"></path>
+                <polyline id="impact-baseline"></polyline>
+                <polyline id="impact-line"></polyline>
+                <circle id="impact-marker" r="1.8"></circle>
+              </svg>
+              <div class="chart-label current" id="impact-threshold">—</div>
+              <div class="chart-axis"><span>45% · wider coverage</span><span>80% · higher precision</span></div>
+            </div>
+          </article>
+
+          <aside class="decision-summary">
+            <header><p class="panel-kicker">DECISION TODAY</p><span class="live-badge">LIVE POLICY</span></header>
+            <div class="summary-primary">
+              <small>EXPECTED MRR PROTECTED</small>
+              <b id="protected-mrr">—</b>
+              <span id="baseline-lift">Comparing with risk-only ranking</span>
+            </div>
+            <dl class="decision-facts">
+              <div><dt>Priority accounts</dt><dd id="priority-count">—</dd></div>
+              <div><dt>At-risk MRR</dt><dd id="at-risk-mrr">—</dd></div>
+              <div><dt>Outreach load</dt><dd id="impact-capacity">—</dd></div>
+              <div><dt>Model state</dt><dd id="model-health">—</dd></div>
+            </dl>
+            <div class="capacity"><i id="impact-capacity-bar" style="width:0"></i></div>
+            <p class="summary-note" id="capacity-summary">Loading capacity</p>
+            <p class="model-note" id="model-quality-summary">Loading holdout metrics</p>
+            <button class="secondary-button full" data-view-link="policy">Tune the policy</button>
+            <span class="visually-hidden" id="impact-queued">—</span>
+          </aside>
+        </section>
+
+        <article class="priority-panel">
+          <header class="panel-header">
+            <div><p class="panel-kicker">NEXT-BEST ACTION</p><h2>Highest-value interventions</h2><p>Only positive-uplift, positive-net-value accounts enter the queue.</p></div>
+            <button class="text-button" data-view-link="accounts">Explore all accounts ↗</button>
+          </header>
+          <div class="account-table overview-table" id="overview-accounts"></div>
+        </article>
+      </section>
+
+      <section class="page" id="view-accounts">
+        <header class="page-heading">
+          <div><p class="eyebrow">ACCOUNT DECISIONS</p><h1>Every account gets a decision, not just a score.</h1><p>Compare risk, incremental effect and expected value before choosing the play.</p></div>
+          <div class="filter-stack"><span id="account-threshold">Loading threshold</span><input id="account-search" type="search" placeholder="Search accounts"></div>
+        </header>
+        <article class="accounts-panel">
+          <header class="panel-header"><div><h2>Scored holdout</h2><p id="account-table-note">Loading model output</p></div><span>Ranked by risk for inspection</span></header>
+          <div class="account-table expanded" id="all-accounts"></div>
+        </article>
+      </section>
+
+      <section class="page" id="view-policy">
+        <header class="page-heading">
+          <div><p class="eyebrow">POLICY SIMULATOR</p><h1>Set the operating point around value and capacity.</h1><p>Preview the queue before applying the policy to the live decision room.</p></div>
+          <button class="primary-button" id="apply-policy">Apply policy</button>
+        </header>
+
+        <section class="simulator-layout">
+          <aside class="control-panel">
+            <header><p class="panel-kicker">POLICY CONTROLS</p><span class="live-badge">PREVIEW</span></header>
+            <div class="control-block">
+              <div class="control-heading"><span>Minimum churn risk</span><b><span id="threshold-number">—</span>%</b></div>
+              <input type="range" id="threshold-slider" min="45" max="80" value="55" aria-label="Minimum churn risk">
+              <div class="range-labels"><span>45%<small>More coverage</small></span><span>80%<small>Higher precision</small></span></div>
+            </div>
+            <div class="preset-row">
+              <button data-threshold="55">Capacity fit<small>Broad eligible pool</small></button>
+              <button data-threshold="64">Higher precision<small>Smaller queue</small></button>
+              <button data-threshold="73">Focus effort<small>Highest risk only</small></button>
+            </div>
+            <div class="control-block capacity-control">
+              <div class="control-heading"><span>Outreach capacity</span><b><span id="capacity-number">50</span> accounts</b></div>
+              <input type="range" id="capacity-slider" min="10" max="100" step="5" value="50" aria-label="Outreach capacity">
+              <div class="range-labels"><span>10<small>Focused team</small></span><span>100<small>Scaled program</small></span></div>
+            </div>
+            <div class="policy-note"><b id="policy-note-title">Loading policy</b><p id="policy-note-copy">Computing the queue against the held-out account set.</p></div>
+          </aside>
+
+          <article class="outcome-panel">
+            <header class="panel-header"><div><p class="panel-kicker">PREVIEW OUTCOME</p><h2>Business effect at this operating point</h2></div><span>Model estimate</span></header>
+            <div class="outcome-grid">
+              <div><small>ACCOUNTS QUEUED</small><b id="queued-value">—</b><em id="capacity-value">—</em></div>
+              <div class="featured"><small>EXPECTED NET VALUE</small><b id="chart-value">—</b><em id="baseline-value">versus risk-only queue</em></div>
+              <div><small>MRR PROTECTED</small><b id="protected-value">—</b><em>incremental estimate</em></div>
+              <div><small>CHURN RECALL</small><b id="recall-value">—</b><em>risk captured</em></div>
+              <div><small>PRECISION</small><b id="precision-value">—</b><em>threshold quality</em></div>
+            </div>
+            <div class="cost-chart">
+              <div class="chart-caption"><span>Expected net value by threshold</span><b>Selected operating point</b></div>
+              <div class="cost-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="cost-labels"><span>45%</span><span>Threshold</span><span>80%</span></div>
+            </div>
+          </article>
+        </section>
+
+        <article class="policy-logic">
+          <header class="panel-header"><div><p class="panel-kicker">QUEUE LOGIC</p><h2>How an account reaches the outreach team</h2></div><span>Server-side policy</span></header>
+          <div class="logic-flow">
+            <div><small>01 · ELIGIBILITY</small><b id="matrix-risk-gate">Score ≥ threshold</b><span>Churn model</span></div>
+            <i>→</i>
+            <div><small>02 · INCREMENTALITY</small><b>Positive uplift</b><span>T-learner estimate</span></div>
+            <i>→</i>
+            <div><small>03 · ECONOMICS</small><b>Positive net value</b><span>Protected MRR − action cost</span></div>
+            <i>→</i>
+            <div class="selected"><small>04 · CAPACITY</small><b>Rank and select</b><span>Highest value first</span></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="page" id="view-monitoring">
+        <header class="page-heading">
+          <div><p class="eyebrow">MODEL HEALTH</p><h1>Know whether the decision policy can still be trusted.</h1><p>Separate model quality, calibration and feature stability from the business decision screen.</p></div>
+          <div class="policy-pill" id="monitor-status"><span class="health-dot"></span>Loading checks</div>
+        </header>
+        <section class="monitor-grid">
+          <article class="monitor-score">
+            <header class="panel-header"><div><p class="panel-kicker">QUALITY</p><h2>Held-out performance</h2><p id="holdout-note">Loading holdout</p></div><span class="quality-badge" id="quality-badge">—</span></header>
+            <div class="quality-metrics">
+              <div><small>PR-AUC</small><b id="monitor-pr-auc">—</b><em>ranking quality</em></div>
+              <div><small>ROC-AUC</small><b id="monitor-roc-auc">—</b><em>discrimination</em></div>
+              <div><small>BRIER</small><b id="monitor-brier">—</b><em>probability error</em></div>
+            </div>
+            <div class="calibration" id="calibration-rows"></div>
+          </article>
+          <article class="drift-panel">
+            <header class="panel-header"><div><p class="panel-kicker">STABILITY</p><h2>Train-to-holdout drift</h2></div><span class="live-badge">STABLE</span></header>
+            <div class="drift-score"><b id="max-psi">—</b><span>maximum population stability index</span></div>
+            <div class="drift-list" id="stability-rows"></div>
+          </article>
+        </section>
+        <article class="segment-panel">
+          <header class="panel-header"><div><p class="panel-kicker">SEGMENT CHECK</p><h2>Performance by customer segment</h2><p>A healthy average should not hide a weak operating segment.</p></div><a class="text-button" href="/api/monitoring" target="_blank" rel="noreferrer">Inspect JSON ↗</a></header>
+          <div class="segment-table" id="segment-rows"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="account-drawer" id="account-drawer" aria-label="Account decision detail">
+    <header class="drawer-header">
+      <div class="account-name"><i class="account-logo coral" id="drawer-logo">—</i><span><b id="drawer-name">Select an account</b><small id="drawer-meta">Loading model output</small></span></div>
+      <button class="close-button" id="close-drawer" aria-label="Close account decision">×</button>
+    </header>
+    <section class="drawer-decision">
+      <p class="panel-kicker">ACCOUNT DECISION</p>
+      <h2 id="drawer-action">—</h2>
+      <p id="drawer-action-copy">Select an account to inspect its recommended intervention.</p>
+      <span id="drawer-policy-tier">Decision policy</span>
+    </section>
+    <section class="decision-metrics">
+      <div><small>CHURN RISK</small><b><span id="drawer-risk">—</span>%</b><em id="drawer-tier">—</em></div>
+      <div><small>EST. UPLIFT</small><b id="drawer-action-uplift">—</b><em id="drawer-uplift">—</em></div>
+      <div><small>NET VALUE</small><b id="drawer-net-value">—</b><em id="drawer-mrr">—</em></div>
+    </section>
+    <section class="drawer-section">
+      <div class="section-title"><h3>Why this account</h3><span>Model reason codes</span></div>
+      <div id="drawer-drivers"></div>
+    </section>
+    <section class="drawer-rationale">
+      <b>Why this play is selected</b>
+      <p>It has positive modeled uplift and net value, then ranks inside the active outreach capacity.</p>
+    </section>
+    <button class="primary-button full drawer-action-button" id="create-task">Copy action plan</button>
+    <footer class="drawer-footer"><span id="drawer-model">Score generated by model</span><a class="api-reference" href="/docs" target="_blank" rel="noreferrer">API ↗</a></footer>
+  </aside>
+
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <section class="score-modal" id="score-modal" aria-label="Score a customer account">
+    <header><div><p class="eyebrow">LIVE SCORING</p><h2>Score an account</h2><p>Change current signals and inspect the resulting risk, uplift and retention play.</p></div><button class="close-button" id="close-modal" aria-label="Close score form">×</button></header>
+    <div class="score-form">
+      <label>Account name<input id="score-name" value="Summit Systems"></label>
+      <label>Segment<select id="score-segment"><option>Enterprise</option><option selected>Business</option><option>Growth</option></select></label>
+      <label>Monthly recurring revenue<input id="score-mrr" type="number" value="42000"></label>
+      <label>Seat change, %<input id="score-seats" type="number" value="-29"></label>
+      <label>Weekly active ratio<input id="score-active" type="number" min="0" max="1" step=".01" value=".41"></label>
+      <label>Open priority tickets<input id="score-tickets" type="number" min="0" value="2"></label>
+      <label>Days to renewal<input id="score-renewal" type="number" min="0" value="26"></label>
+      <label>Feature adoption<input id="score-adoption" type="number" min="0" max="1" step=".01" value=".35"></label>
+      <label>Tenure, months<input id="score-tenure" type="number" min="1" value="24"></label>
+      <label>NPS<input id="score-nps" type="number" min="-100" max="100" value="8"></label>
+      <label>Resolution time, hours<input id="score-resolution" type="number" min="0" value="28"></label>
+    </div>
+    <div class="modal-actions"><button class="secondary-button" id="cancel-score">Cancel</button><button class="primary-button" id="run-score">Run model</button></div>
+    <div class="score-result" id="score-result">
+      <div class="result-score"><span><span id="result-risk">—</span><small>%</small></span><div><small>CHURN RISK</small><b id="result-tier">—</b></div></div>
+      <div class="result-action"><small>RECOMMENDED ACTION</small><b id="result-action">—</b><p id="result-copy">Run the model to calculate this account.</p></div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"><span>✓</span><div><b id="toast-title">Policy saved</b><small id="toast-copy">The active policy is now persistent.</small></div></div>
+  <script src="browser-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

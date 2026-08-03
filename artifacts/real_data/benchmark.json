@@ -1,0 +1,148 @@
+{
+  "dataset": {
+    "source_url": "https://raw.githubusercontent.com/TerraBaseAI/campaign-decisioning-engine/c44ae9aea5923533ffdaf34522e4937afd813c9e/data/hillstrom.csv",
+    "source_commit": "c44ae9aea5923533ffdaf34522e4937afd813c9e",
+    "sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+    "raw_rows": 64000,
+    "contrast_rows": 42613,
+    "train_rows": 34090,
+    "holdout_rows": 8523,
+    "treatment_arm": "Mens E-Mail",
+    "control_arm": "No E-Mail",
+    "outcome": "visit"
+  },
+  "contract": {
+    "features": [
+      "recency",
+      "history",
+      "mens",
+      "womens",
+      "newbie",
+      "history_segment",
+      "zip_code",
+      "channel"
+    ],
+    "excluded_post_treatment_columns": [
+      "segment",
+      "visit",
+      "conversion",
+      "spend"
+    ],
+    "split": "joint treatment/outcome 80/20 holdout",
+    "seed": 42,
+    "maximum_capacity": 0.2,
+    "realized_capacity": 0.200047
+  },
+  "experiment_health": {
+    "arm_counts": {
+      "control": 21306,
+      "mens_email": 21307
+    },
+    "srm_chi_square": 2.3e-05,
+    "srm_p_value": 0.996135,
+    "srm_pass": true,
+    "maximum_abs_smd": 0.01636,
+    "covariate_balance_pass": true,
+    "largest_balance_differences": [
+      {
+        "feature": "history_segment:2) $100 - $200",
+        "smd": -0.01636,
+        "abs_smd": 0.01636,
+        "pass": true
+      },
+      {
+        "feature": "history_segment:7) $1,000 +",
+        "smd": 0.015835,
+        "abs_smd": 0.015835,
+        "pass": true
+      },
+      {
+        "feature": "zip_code:Rural",
+        "smd": 0.013659,
+        "abs_smd": 0.013659,
+        "pass": true
+      },
+      {
+        "feature": "zip_code:Surburban",
+        "smd": -0.011743,
+        "abs_smd": 0.011743,
+        "pass": true
+      },
+      {
+        "feature": "channel:Web",
+        "smd": 0.011014,
+        "abs_smd": 0.011014,
+        "pass": true
+      }
+    ]
+  },
+  "model": {
+    "type": "logistic-regression T-learner",
+    "diagnostics": {
+      "control": {
+        "rows": 4261,
+        "outcome_rate": 0.106078,
+        "roc_auc": 0.639428,
+        "brier_score": 0.093084
+      },
+      "mens_email": {
+        "rows": 4262,
+        "outcome_rate": 0.182778,
+        "roc_auc": 0.631366,
+        "brier_score": 0.144377
+      }
+    },
+    "uplift_distribution": {
+      "minimum": -0.044452,
+      "median": 0.071525,
+      "maximum": 0.175658,
+      "positive_share": 0.999296
+    }
+  },
+  "heldout_metrics": {
+    "average_treatment_effect": {
+      "point": 0.0766996531240367,
+      "lower": 0.06338732359681583,
+      "upper": 0.09204788006413779,
+      "n_boot": 500
+    },
+    "qini_coefficient": {
+      "point": 0.01444948205305362,
+      "lower": -0.016555603391067802,
+      "upper": 0.04571066575822787,
+      "n_boot": 500
+    },
+    "top_capacity_uplift": {
+      "point": 0.11672958884418705,
+      "lower": 0.07333106456496741,
+      "upper": 0.15120112582045997,
+      "n_boot": 500
+    },
+    "policy_gain_vs_random_capacity": {
+      "point": 0.006001229978892658,
+      "lower": -0.0019003894379248918,
+      "upper": 0.012793636204092199,
+      "n_boot": 500
+    },
+    "learned_policy_value": 0.127423,
+    "random_capacity_policy_value": 0.121422
+  },
+  "promotion": {
+    "decision": "PROMOTE_AVERAGE_EFFECT_ONLY",
+    "average_effect_supported": true,
+    "targeting_supported": false,
+    "targeting_gates": {
+      "qini_lower_above_zero": false,
+      "top_capacity_uplift_above_ate": true,
+      "policy_gain_lower_above_zero": false
+    }
+  },
+  "runtime": {
+    "run_date": "2026-08-03",
+    "python": "3.13.5",
+    "scikit_learn": "1.8.0",
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "platform": "Windows-11-10.0.26200-SP0"
+  }
+}
