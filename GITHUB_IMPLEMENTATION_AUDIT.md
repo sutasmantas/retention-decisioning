@@ -7,7 +7,7 @@ Date: 2026-08-05
 Repository components were checked before admitting any substantial custom
 logic. The audit compares implemented estimators, metrics, policy/evaluation
 seams, maintenance, runtime compatibility, downloads, and integration cost.
-License was not researched or used as a filter. No repository was cloned into
+No repository was cloned into
 SignalRoom, no data/model was downloaded, and no dependency or application
 code changed during this dossier.
 
