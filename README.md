@@ -1,5 +1,7 @@
 # SignalRoom
 
+**Verification:** [claim-to-artifact map and rerun commands](https://sutasmantas.github.io/evidence/#signalroom) · [machine-readable receipt](https://sutasmantas.github.io/evidence/receipt.json)
+
 [![CI](https://github.com/sutasmantas/retention-decisioning/actions/workflows/ci.yml/badge.svg)](https://github.com/sutasmantas/retention-decisioning/actions/workflows/ci.yml)
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Coverage 85%+](https://img.shields.io/badge/coverage-85%25%2B-15803D)](.github/workflows/ci.yml)

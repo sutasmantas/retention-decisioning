@@ -1,5 +1,7 @@
 # Expertise notes
 
+**Verification:** [claim-to-artifact map and rerun commands](https://sutasmantas.github.io/evidence/#signalroom) · [machine-readable receipt](https://sutasmantas.github.io/evidence/receipt.json)
+
 ## When real randomized data supports an intervention but not necessarily targeting
 
 ### Client trigger
